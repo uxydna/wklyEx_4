@@ -463,16 +463,36 @@ leaflet(data = mpls_all) %>%
             values = ~prop_sus) 
 ```
   
-  18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows. 
+  18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows.
+  
+  From the 'Stations' data set, it seems like every station starts with some bikes along with some empty docks. How full each station is can be measured by the proportion of the number of bikes and the total slots. How this proportion differs by location?
+  
+  Looks like in city centers there are some stations that have no bikes and only docks, and vice versa. In most other places it is the stations are decently full, and not either extremely empty or totally full.
 ```{r}
-Stations %>%
-  mutate(bike_vs_emptydocks = nbBikes - nbEmptyDocks)
+newDataSet <- Stations %>%
+  mutate(fullness = nbBikes / (nbBikes + nbEmptyDocks))
+
+pal <- colorNumeric('viridis',
+                    domain = newDataSet$fullness)
+
+leaflet(data = newDataSet) %>%
+  addProviderTiles(providers$Stamen.Terrain) %>%
+  addCircleMarkers(lng = ~long,
+                   lat = ~lat,
+                   opacity = 0.5,
+                   radius = 1,
+                   color = ~pal(fullness)) %>%
+  addLegend(position = "bottomleft",
+            pal = pal,
+            values = ~fullness)
+  
 ```
   
   
 ## GitHub link
 
   19. Below, provide a link to your GitHub page with this set of Weekly Exercises. Specifically, if the name of the file is 04_exercises.Rmd, provide a link to the 04_exercises.md file, which is the one that will be most readable on GitHub.
+  
 
 
 **DID YOU REMEMBER TO UNCOMMENT THE OPTIONS AT THE TOP?**
