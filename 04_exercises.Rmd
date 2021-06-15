@@ -410,8 +410,6 @@ mpls_suspicious <- MplsStops %>%
   summarize(num_stps = n(), 
             prop_sus = mean(sus, na.rm = TRUE))
 
-mpls_suspicious
-MplsStops
 ```
   
   
@@ -435,13 +433,41 @@ leaflet(data = MplsStops) %>%
   
   16. Save the folder from moodle called Minneapolis_Neighborhoods into your project/repository folder for this assignment. Make sure the folder is called Minneapolis_Neighborhoods. Use the code below to read in the data and make sure to **delete the `eval=FALSE`**. Although it looks like it only links to the .sph file, you need the entire folder of files to create the `mpls_nbhd` data set. These data contain information about the geometries of the Minneapolis neighborhoods. Using the `mpls_nbhd` dataset as the base file, join the `mpls_suspicious` and `MplsDemo` datasets to it by neighborhood (careful, they are named different things in the different files). Call this new dataset `mpls_all`.
 
-```{r, eval=FALSE}
+```{r}
 mpls_nbhd <- st_read("Minneapolis_Neighborhoods/Minneapolis_Neighborhoods.shp", quiet = TRUE)
+
+mpls_all <- mpls_nbhd %>%
+  left_join(mpls_suspicious, by = c('BDNAME' = 'neighborhood')) %>%
+  left_join(MplsDemo, by = c('BDNAME' = 'neighborhood'))
 ```
 
   17. Use `leaflet` to create a map from the `mpls_all` data  that colors the neighborhoods by `prop_suspicious`. Display the neighborhood name as you scroll over it. Describe what you observe in the map.
   
+  overall, the proportion of suspicious stops decreases from south to north Minneapolis and the Morris Park neighborhood has the highest proportion.
+```{r}
+pal <- colorNumeric('viridis', 
+                    domain = mpls_all$prop_sus)
+
+leaflet(data = mpls_all) %>%
+  addProviderTiles(providers$Stamen.TonerHybrid) %>%
+  addPolygons(fillColor = ~pal(prop_sus),
+              fillOpacity = 0.5,
+              weight = 0.5,
+              highlight = highlightOptions(weight = 5, 
+                                 color = "black",
+                                 fillOpacity = 0.9,
+                                 bringToFront = FALSE),
+              popup = ~paste(BDNAME)) %>%
+  addLegend(position = "bottomleft",
+            pal = pal,
+            values = ~prop_sus) 
+```
+  
   18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows. 
+```{r}
+Stations %>%
+  mutate(bike_vs_emptydocks = nbBikes - nbEmptyDocks)
+```
   
   
 ## GitHub link
